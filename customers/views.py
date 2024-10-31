@@ -15,12 +15,23 @@ def customers(request):
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def register(request):
-   user = Customer.objects.create_user(
-               username=request.data['username'],
-               email=request.data['email'],
-               password=request.data['password']
-           )
-   user.is_active = True
-   user.is_staff = True
-   user.save()
-   return Response("new user born")
+    try:
+
+        user = Customer.objects.create_user(
+            username=request.data.get('username'),
+            email=request.data.get('email', ''),
+            password=request.data.get('password', '')  
+        )
+
+
+        # Optional fields for additional attributes in the Customer model
+        user.city = request.data.get('city', '')
+        user.age = request.data.get('age', None)
+        user.phone = request.data.get('phone', '')
+        user.is_active = request.data.get('is_active', True)  # Set to True by default
+        user.save()
+
+        return Response({"message": "New user registered successfully"}, status=201)
+    
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)

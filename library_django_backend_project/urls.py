@@ -25,8 +25,8 @@ import loanings.views
 urlpatterns = [
     path('',loanings.views.welcome, name='welcome'),
     path('admin/', admin.site.urls),
-    path('products/', include('customers.urls')),
-    path('products/', include('loanings.urls')),
+    path('customers/', include('customers.urls')),
+    path('loans/', include('loanings.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
