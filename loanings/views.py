@@ -221,3 +221,68 @@ def display_customer_late_loans(request, customer_id):
         return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])  # Allow authenticated users to access, but also allow read-only access
+def find_book_by_name(request, name):
+    try:
+        # Filter books by name (case-insensitive)
+        books = Book.objects.filter(title__icontains=name)
+
+        if not books.exists():
+            return Response({"error": "No books found with that name"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Serialize the book data
+        serializer = BookSerializer(books, many=True)
+
+        # Return the serialized data as a JSON response
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def remove_book(request, book_id):
+    try:
+        # Retrieve the book by ID
+        book = Book.objects.get(id=book_id)
+        book.delete()  # Delete the book instance
+
+        return Response({"message": "Book removed successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+    except Book.DoesNotExist:
+        return Response({"error": "Book not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def update_book(request, book_id):
+    try:
+        # Retrieve the book by ID
+        book = Book.objects.get(id=book_id)
+        
+        # Update the book fields based on the request data
+        book.title = request.data.get('title', book.title)
+        book.author = request.data.get('author', book.author)
+        book.description = request.data.get('description', book.description)
+        book.published_year = request.data.get('published_year', book.published_year)
+        book.book_type = request.data.get('book_type', book.book_type)
+        book.isActive = request.data.get('isActive', book.isActive)
+        book.image = request.data.get('image', book.image)
+
+        # Save the updated book instance
+        book.save()
+
+        # Serialize the updated book data
+        serializer = BookSerializer(book)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Book.DoesNotExist:
+        return Response({"error": "Book not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
