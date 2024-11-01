@@ -4,8 +4,11 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework.response import Response
+from rest_framework import status
 
-from customers.models import Customer 
+
+from customers.models import Customer
+from customers.serializers import CustomerSerializer 
 
 
 def customers(request):
@@ -35,3 +38,19 @@ def register(request):
     
     except Exception as e:
         return Response({"error": str(e)}, status=400)
+    
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def display_customers(request):
+    try:
+        # Retrieve all customers
+        customers = Customer.objects.all()
+
+        # Serialize the customer data with their loans
+        serializer = CustomerSerializer(customers, many=True)
+
+        # Return the serialized data as a JSON response
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

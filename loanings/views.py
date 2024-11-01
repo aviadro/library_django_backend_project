@@ -1,15 +1,16 @@
-from datetime import timezone
+from django.utils import timezone
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.core.exceptions import ValidationError
 
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework import status
 
 from customers.models import Customer
 from loanings.models import Book, Loan
-from loanings.serializers import BookSerializer
+from loanings.serializers import BookSerializer, LoanSerializer
 
 
 def welcome(request):
@@ -60,7 +61,7 @@ def loan_book(request):
             book_id=book,
             cust_id=customer,
             loan_date=timezone.now(),
-            due_date=due_date
+            due_date=due_date,
             is_active=True
         )
 
@@ -72,6 +73,150 @@ def loan_book(request):
 
     except Book.DoesNotExist:
         return Response({"error": "Book not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def return_book(request):
+    try:
+        # Retrieve loan_id from the request
+        loan_id = request.data.get('loan_id')
+        
+        # Get the loan instance
+        loan = Loan.objects.get(id=loan_id)
+
+        # Check if the authenticated user is the customer who loaned the book or an admin
+        if not request.user.is_staff and loan.cust_id.id != request.user.id:
+            return Response({"error": "Not authorized to return this book"}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check if the loan is already inactive
+        if not loan.is_active:
+            return Response({"error": "This book is already returned."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Set the return date to the current date and mark the loan as inactive
+        loan.return_date = timezone.now()
+        loan.is_active = False
+        loan.save()
+
+        # Update the book availability
+        loan.book_id.isActive = True
+        loan.book_id.save()
+
+        return Response({"message": "Book returned successfully"}, status=status.HTTP_200_OK)
+
+    except Loan.DoesNotExist:
+        return Response({"error": "Loan record not found"}, status=status.HTTP_404_NOT_FOUND)
+    except ValidationError as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def display_books(request):
+    try:
+        # Retrieve all book records
+        books = Book.objects.all()
+
+        # Serialize the book data
+        serializer = BookSerializer(books, many=True)
+
+        # Return the serialized data as a JSON response
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def display_loans(request):
+    try:
+        # Retrieve active and inactive loans separately
+        active_loans = Loan.objects.filter(is_active=True)
+        inactive_loans = Loan.objects.filter(is_active=False)
+
+        # Serialize the loan data
+        active_serializer = LoanSerializer(active_loans, many=True)
+        inactive_serializer = LoanSerializer(inactive_loans, many=True)
+
+        # Return the serialized data in separate lists for active and inactive loans
+        return Response({
+            "active_loans": active_serializer.data,
+            "inactive_loans": inactive_serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+def display_customer_loans(request, customer_id):
+    try:
+        # Check if the customer exists
+        customer = Customer.objects.get(id=customer_id)
+
+        # Check if the requesting user is either an admin or the specified customer
+        if not (request.user.is_staff or request.user.id == customer.user.id):
+            return Response({"error": "Not authorized to view these loans"}, status=status.HTTP_403_FORBIDDEN)
+
+        # Filter loans for the specified customer
+        active_loans = Loan.objects.filter(cust_id=customer, is_active=True)
+        inactive_loans = Loan.objects.filter(cust_id=customer, is_active=False)
+
+        # Serialize the loan data
+        active_serializer = LoanSerializer(active_loans, many=True)
+        inactive_serializer = LoanSerializer(inactive_loans, many=True)
+
+        # Return the serialized data in separate lists for active and inactive loans
+        return Response({
+            "active_loans": active_serializer.data,
+            "inactive_loans": inactive_serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def display_late_loans(request):
+    try:
+        # Filter loans where the return date has passed and the loan is still active
+        late_loans = Loan.objects.filter(due_date__lt=timezone.now(), is_active=True)
+
+        # Serialize the late loan data
+        serializer = LoanSerializer(late_loans, many=True)
+
+        # Return the serialized data as a JSON response
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+def display_customer_late_loans(request, customer_id):
+    try:
+        # Retrieve the customer instance
+        customer = Customer.objects.get(id=customer_id)
+
+        # Check if the requesting user is either an admin or the specified customer
+        if not (request.user.is_staff or request.user.id == customer.user.id):
+            return Response({"error": "Not authorized to view these loans"}, status=status.HTTP_403_FORBIDDEN)
+
+        # Filter late loans for the specified customer
+        late_loans = Loan.objects.filter(cust_id=customer, due_date__lt=timezone.now(), is_active=True)
+
+        # Serialize the late loan data
+        serializer = LoanSerializer(late_loans, many=True)
+
+        # Return the serialized data as a JSON response
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     except Customer.DoesNotExist:
         return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:

@@ -21,9 +21,10 @@ class Book(models.Model):
         return self.title
     
 class Loan(models.Model):
-    cust_id = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    cust_id = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="loans")
     book_id = models.ForeignKey(Book, on_delete=models.CASCADE)  
     loan_date = models.DateField(auto_now_add=True)                              
+    due_date =  models.DateField(null=True, blank=True)
     return_date = models.DateField(null=True, blank=True)      
     is_active = models.BooleanField(default=True)              
 
