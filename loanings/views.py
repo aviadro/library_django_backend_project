@@ -30,7 +30,7 @@ def add_book(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def loan_book(request):
     try:
         # Retrieve book_id and customer_id from the request
@@ -121,7 +121,7 @@ def return_book(request):
 def display_books(request):
     try:
         # Retrieve all book records
-        books = Book.objects.all()
+        books = Book.objects.all().order_by('author').values()
 
         # Serialize the book data
         serializer = BookSerializer(books, many=True)
@@ -132,6 +132,27 @@ def display_books(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])  # Require the user to be authenticated
+def display_book(request, book_id):
+    try:
+        # Try to retrieve the book by its ID
+        book = Book.objects.get(id=book_id)
+        
+        # Serialize the book data
+        serializer = BookSerializer(book)
+        
+        # Return the book details in the response
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Book.DoesNotExist:
+        # Return an error if the book is not found
+        return Response({"error": "Book not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        # Handle any other exceptions
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def display_loans(request):
@@ -154,13 +175,20 @@ def display_loans(request):
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['GET'])
+def display_active_loans(request):
+        active_loans = Loan.objects.filter(is_active=True)#.select_related('book', 'customer')
+        serializer = LoanSerializer(active_loans, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
 def display_customer_loans(request, customer_id):
     try:
         # Check if the customer exists
         customer = Customer.objects.get(id=customer_id)
 
         # Check if the requesting user is either an admin or the specified customer
-        if not (request.user.is_staff or request.user.id == customer.user.id):
+        if not (request.user.is_staff or request.user.id == customer.id):
             return Response({"error": "Not authorized to view these loans"}, status=status.HTTP_403_FORBIDDEN)
 
         # Filter loans for the specified customer
@@ -205,7 +233,7 @@ def display_customer_late_loans(request, customer_id):
         customer = Customer.objects.get(id=customer_id)
 
         # Check if the requesting user is either an admin or the specified customer
-        if not (request.user.is_staff or request.user.id == customer.user.id):
+        if not (request.user.is_staff or request.user.id == customer.id):
             return Response({"error": "Not authorized to view these loans"}, status=status.HTTP_403_FORBIDDEN)
 
         # Filter late loans for the specified customer

@@ -10,8 +10,8 @@ class BookSerializer(serializers.ModelSerializer):
 
 
 class LoanSerializer(serializers.ModelSerializer):
-    # book = BookSerializer(source='book_id', read_only=True)
-    # customer = CustomerSerializer (source='cust_id', read_only=True)
+    book = BookSerializer(source='book_id', read_only=True)
+    customer = CustomerSerializer (source='cust_id', read_only=True)
 
     class Meta:
         model = Loan

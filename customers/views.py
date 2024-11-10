@@ -128,3 +128,19 @@ def update_customer(request, customer_id):
         return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_customer_by_id(request, customer_id):
+    try:
+        # Fetch the customer object by ID
+        customer = Customer.objects.get(id=customer_id)
+
+        # Serialize the customer data
+        serializer = CustomerSerializer(customer)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -8,5 +8,6 @@ urlpatterns = [
     path('find_customer/<str:name>/',views.find_customer_by_name, name='find_customer_by_name'),
     path('remove_customer/<int:customer_id>/', views.remove_customer, name='remove_customer'),
     path('update_customer/<int:customer_id>/', views.update_customer, name='update_customer'),
+    path('customer/<int:customer_id>/', views.get_customer_by_id, name='get_customer_by_id'),
 
 ]
