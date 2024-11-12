@@ -152,7 +152,7 @@ def return_book(request):
     
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticatedOrReadOnly])
+# @permission_classes([IsAuthenticatedOrReadOnly])
 def display_books(request):
     try:
         # Retrieve all book records
