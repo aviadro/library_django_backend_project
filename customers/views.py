@@ -13,7 +13,7 @@ from customers.serializers import CustomerSerializer
 
 
 def customers(request):
-    return HttpResponse("Welcome to the customers!")
+    return HttpResponse("Welcome to the customers!<br>urls in main window..")
 
 
 @api_view(['POST'])

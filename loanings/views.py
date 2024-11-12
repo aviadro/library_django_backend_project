@@ -14,10 +14,45 @@ from loanings.serializers import BookSerializer, LoanSerializer
 
 
 def welcome(request):
-    return HttpResponse("Welcome to the library!")
+    return HttpResponse("""<h2>Welcome to the Library!</h2>
+<p>Available URLs:</p>
+<ul>
+    <li><strong>Books Management:</strong>
+        <ul>
+            <li><code>/loans/add_book</code> - Add a new book (admin).</li>
+            <li><code>/loans/remove_book/<int:book_id>/</code> - Remove a book (admin).</li>
+            <li><code>/loans/update_book/<int:book_id>/</code> - Update book details (admin).</li>
+            <li><code>/loans/display_books</code> - View all books.</li>
+            <li><code>/loans/display_book/<int:book_id>/</code> - View details of a specific book.</li>
+            <li><code>/loans/find_book/<str:name>/</code> - Search for a book by name.</li>
+        </ul>
+    </li>
+    <li><strong>Loans Management:</strong>
+        <ul>
+            <li><code>/loans/loan_book</code> - Loan a book.</li>
+            <li><code>/loans/return_book</code> - Return a book.</li>
+            <li><code>/loans/display_loans</code> - View all loans (admin).</li>
+            <li><code>/loans/display_active_loans</code> - View all active loans.</li>
+            <li><code>/loans/late_loans</code> - View late loans (admin).</li>
+            <li><code>/loans/late_loans/<int:customer_id>/</code> - View late loans for a specific customer.</li>
+            <li><code>/loans/customer/<int:customer_id>/</code> - View all loans for a specific customer.</li>
+        </ul>
+    </li>
+    <li><strong>Customer Management:</strong>
+        <ul>
+            <li><code>/customer/register</code> - Register a new customer (admin).</li>
+            <li><code>/customer/display_customers</code> - View all customer details (admin).</li>
+            <li><code>/customer/find_customer/<str:name>/</code> - Search for a customer by name (admin).</li>
+            <li><code>/customer/remove_customer/<int:customer_id>/</code> - Remove a customer (admin).</li>
+            <li><code>/customer/update_customer/<int:customer_id>/</code> - Update customer details (admin).</li>
+            <li><code>/customer/customer/<int:customer_id>/</code> - View details of a specific customer.</li>
+        </ul>
+    </li>
+</ul>
+""")
 
 def loanings(request):
-    return HttpResponse("Welcome to loanings!")
+    return HttpResponse("Welcome to loanings!<br>urls in main window..")
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
@@ -30,7 +65,7 @@ def add_book(request):
 
 
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def loan_book(request):
     try:
         # Retrieve book_id and customer_id from the request
