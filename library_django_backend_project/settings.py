@@ -171,3 +171,12 @@ DATABASES = {
         'PORT': config('DATABASE_PORT'),       
     }
 }   
+
+
+CSRF_COOKIE_SECURE = True
+
+ALLOWED_HOSTS = ['library-django-backend-project.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://library-django-backend-project.onrender.com']
+CORS_ALLOWED_ORIGINS = [
+    'https://library-django-backend-project.onrender.com',
+]
