@@ -156,11 +156,11 @@ def return_book(request):
 def display_books(request):
     try:
         # Retrieve all book records
-        books = Book.objects.all().order_by('author').values()
+        books = Book.objects.all().order_by('author')
 
         # Serialize the book data
         serializer = BookSerializer(books, many=True)
-
+    
         # Return the serialized data as a JSON response
         return Response(serializer.data, status=status.HTTP_200_OK)
 
