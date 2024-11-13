@@ -17,7 +17,6 @@ def customers(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
 def register(request):
     try:
 
