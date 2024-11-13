@@ -177,6 +177,6 @@ CSRF_COOKIE_SECURE = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'library-django-backend-project.onrender.com']
 CSRF_TRUSTED_ORIGINS = ['https://library-django-backend-project.onrender.com']
-CORS_ALLOWED_ORIGINS = [
-    'https://library-django-backend-project.onrender.com',
-]
+# CORS_ALLOWED_ORIGINS = [
+#     'https://library-django-backend-project.onrender.com',
+# ]
