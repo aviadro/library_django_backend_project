@@ -14,7 +14,7 @@ class Book(models.Model):
     image = models.ImageField(null=True, blank=True, default='/placeholder.png')
 
     def clean(self):
-        if self.published_year > 2024:  
+        if self.published_year > 2025:  
             raise ValidationError('Published year cannot be in the future.')
 
     def __str__(self):

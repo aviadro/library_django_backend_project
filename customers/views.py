@@ -7,10 +7,15 @@ from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
 
 from customers.models import Customer
 from customers.serializers import CustomerSerializer 
 
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 def customers(request):
     return HttpResponse("Welcome to the customers!<br>urls in main window..")

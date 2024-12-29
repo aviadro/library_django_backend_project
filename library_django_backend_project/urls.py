@@ -23,6 +23,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from customers.views import CustomTokenObtainPairView
 
 import loanings
 import loanings.views
@@ -32,7 +33,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('customers/', include('customers.urls')),
     path('loans/', include('loanings.urls')),
-    path('login', TokenObtainPairView.as_view(), name='login'),
+    path('login', CustomTokenObtainPairView.as_view(), name='login'),
     path('refresh', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
