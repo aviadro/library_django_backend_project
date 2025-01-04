@@ -147,7 +147,7 @@ AUTH_USER_MODEL = 'customers.Customer'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
     
@@ -179,7 +179,18 @@ DATABASES = {
 CSRF_COOKIE_SECURE = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'library-django-backend-project.onrender.com']
-CSRF_TRUSTED_ORIGINS = ['https://library-django-backend-project.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://library-django-backend-project.onrender.com',
+                        'http://127.0.0.1:3000',
+                        'http://localhost:3000',]
 CORS_ALLOWED_ORIGINS = [
     'https://library-django-backend-project.onrender.com',
+    'http://127.0.0.1:3000',  # For local frontend development (if needed)
+    'http://localhost:3000',  # For local frontend development
 ]
+
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'Authorization',
+]
+CORS_EXPOSE_HEADERS = ['Authorization']
