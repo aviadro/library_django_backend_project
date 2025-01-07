@@ -40,12 +40,12 @@ def welcome(request):
     </li>
     <li><strong>Customer Management:</strong>
         <ul>
-            <li><code>/customer/register</code> - Register a new customer.</li>
-            <li><code>/customer/display_customers</code> - View all customer details (admin).</li>
-            <li><code>/customer/find_customer/(str:name)/</code> - Search for a customer by name (admin).</li>
-            <li><code>/customer/remove_customer/(int:customer_id)/</code> - Remove a customer (admin).</li>
-            <li><code>/customer/update_customer/(int:customer_id)/</code> - Update customer details (admin).</li>
-            <li><code>/customer/customer/(int:customer_id)/</code> - View details of a specific customer.</li>
+            <li><code>/customers/register</code> - Register a new customer.</li>
+            <li><code>/customers/display_customers</code> - View all customer details (admin).</li>
+            <li><code>/customers/find_customer/(str:name)/</code> - Search for a customer by name (admin).</li>
+            <li><code>/customers/remove_customer/(int:customer_id)/</code> - Remove a customer (admin).</li>
+            <li><code>/customers/update_customer/(int:customer_id)/</code> - Update customer details (admin).</li>
+            <li><code>/customers/customer/(int:customer_id)/</code> - View details of a specific customer.</li>
         </ul>
     </li>
 </ul>
