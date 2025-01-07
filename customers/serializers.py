@@ -16,5 +16,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Add custom claims
         token['username'] = user.username
         token['is_admin'] = user.is_staff  # Assuming is_staff represents admin status
+        token['is_active'] = user.is_active
 
         return token
